@@ -9,18 +9,15 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Install skopeo
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y skopeo
-      
       - name: Login to Aliyun Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: crpi-5nhti4u3n1folqgv.cn-beijing.personal.cr.aliyuncs.com
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+      
+      - name: Pull and push image
         run: |
-          skopeo login --username ${{ secrets.ALIYUN_USERNAME }} \
-            --password ${{ secrets.ALIYUN_PASSWORD }} \
-            crpi-5nhti4u3n1folqgv.cn-beijing.personal.cr.aliyuncs.com
-
-      - name: Sync image
-        run: |
-          skopeo copy docker://docker.io/library/nginx:latest \
-            docker://crpi-5nhti4u3n1folqgv.cn-beijing.personal.cr.aliyuncs.com/irober/nginx:latest
+          docker pull nginx:latest
+          docker tag nginx:latest crpi-5nhti4u3n1folqgv.cn-beijing.personal.cr.aliyuncs.com/irober/nginx:latest
+          docker push crpi-5nhti4u3n1folqgv.cn-beijing.personal.cr.aliyuncs.com/irober/nginx:latest
